@@ -9,7 +9,8 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   (the defaults): at one Spark the n-gram table's rows are gathered by a 32-thread gang, rows are touched ahead of
   their chunk or draft, and the table's mappings are `MADV_RANDOM`. Cold prompts of new text 2-9x faster (8k 19-26 s
   -> 3.0 s, 128k 100 s -> 50 s), decode of new text at four clients +27%; warm prompts unchanged, every reply
-  byte-identical.
+  byte-identical. A setting past its cap (`TF_FLASHNEXT_NGRAM_THREADS` 128, `TF_FLASHNEXT_NGRAM_AHEAD` 16) or not a number
+  stops the start with the setting named.
 
 ## [1.0.0] - 2026-10-08
 
