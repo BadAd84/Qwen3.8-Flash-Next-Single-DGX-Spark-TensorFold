@@ -216,8 +216,8 @@ info=$(python3 -I -c "$CHECK_PY" "$snap" 2>&1) || die "the checkpoint at $snap i
 log "Checkpoint OK: $info"
 if [[ "$MTP_FP8" == 1 ]]; then
   sub=$(mtp_fp8_sub)
-  if [[ -f "$HF_CACHE/$sub/mtp-fp8.safetensors" ]]; then
-    log "MTP FP8 overlay: $HF_CACHE/$sub (present)"
+  if mtp_fp8_ok; then
+    log "MTP FP8 overlay: $HF_CACHE/$sub (present, sha256 checked)"
   else
     log "Writing the MTP layer's linears on block FP8 (tools/mtp_fp8.py) into $HF_CACHE/$sub"
     mkdir -p "$HF_CACHE/$sub"
@@ -225,6 +225,7 @@ if [[ "$MTP_FP8" == 1 ]]; then
       -v "$HF_CACHE":/hf --entrypoint python3 "$IMAGE" /tools/mtp_fp8.py \
       "/hf/hub/models--${MODEL_ID//\//--}/snapshots/$rev" "/hf/$sub" ||
       die "tools/mtp_fp8.py failed (MTP_FP8=0 serves without the overlay)"
+    mtp_fp8_ok || die "the overlay in $HF_CACHE/$sub does not match its mtp-fp8.sha256"
   fi
 fi
 prepared_state > "$PREPARED_MARKER"

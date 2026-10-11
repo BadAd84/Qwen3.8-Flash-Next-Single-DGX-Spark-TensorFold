@@ -283,7 +283,7 @@ Every setting lives in [`scripts/config.sh`](scripts/config.sh). Override it fro
 | `PARALLEL` | `8` | requests decoded together. One that would not fit (prompt plus `max_tokens`) is refused |
 | `CONTEXT` | `262144` | prompt + reply window. `1048576` turns on YaRN factor 4 |
 | `DRAFTS` | `1` | MTP drafts; `0` passes `--no-drafts` |
-| `MTP_FP8` | `1` | the drafts' MTP layer on block FP8 (`patches/0011`): `prepare.sh` writes the overlay with `tools/mtp_fp8.py` into `$HF_CACHE/tensorfold-mtp-fp8/`. Drafts only; replies match. `0` drafts from the bf16 layer |
+| `MTP_FP8` | `1` | the drafts' MTP layer on block FP8 (`patches/0011`): `prepare.sh` writes the overlay with `tools/mtp_fp8.py` into `$HF_CACHE/tensorfold-mtp-fp8/<model>/<revision>/tool-<sha>/` (a new one for a new checkpoint revision or tool version; its sha256 checked at prepare and start). Drafts only; replies match. `0` drafts from the bf16 layer |
 | `TF_FLASHNEXT_DEPTH` | `15` | drafts a round. The stop rule is the engine's hybrid (see `TF_FLASHNEXT_PRODUCT_STREAMS`) |
 | `TEMPERATURE` / `TOP_P` / `TOP_K` | `1.0` / `0.95` / `20` | default sampling; a request's own values win |
 | `THINKING` | `1` | think before answering; `0` passes `--no-thinking` |

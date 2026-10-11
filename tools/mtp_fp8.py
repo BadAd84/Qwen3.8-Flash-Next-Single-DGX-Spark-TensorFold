@@ -6,9 +6,12 @@ Usage: tools/mtp_fp8.py SNAPSHOT OUTDIR      (scripts/prepare.sh runs it in the 
 INT4-AutoRound keeps the MTP layer in bf16: its attention q/k/v/o, both hyper-connections' down/up and the mixer's,
 ~139 MB that every draft step reads. This writes them as e4m3 codes (`.weight`) and fp32 scales
 (`.weight_scale_inv`, one per 128x128 block: scale = block amax / 448, weight ~= codes * scale), the format of the
-checkpoint's own block-FP8 tensors, into OUTDIR/mtp-fp8.safetensors. The engine loads them in place of the bf16 ones.
-The MTP head only drafts and every draft is verified, so replies stay byte-identical; only the drafts can change.
+checkpoint's own block-FP8 tensors, into OUTDIR/mtp-fp8.safetensors, and its sha256 into OUTDIR/mtp-fp8.sha256
+(`sha256sum -c` format; prepare.sh and start.sh accept the overlay only when it checks). The engine loads them in
+place of the bf16 ones. The MTP head only drafts and every draft is verified, so replies stay byte-identical; only
+the drafts can change.
 """
+import hashlib
 import json
 import os
 import sys
@@ -55,8 +58,19 @@ def main() -> int:
     os.makedirs(outdir, exist_ok=True)
     tmp = os.path.join(outdir, "mtp-fp8.safetensors.tmp")
     save_file(out, tmp)
+    digest = hashlib.sha256()
+    with open(tmp, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            digest.update(block)
+    # the old checksum goes first: an overlay without one is rewritten, never accepted
+    sha = os.path.join(outdir, "mtp-fp8.sha256")
+    if os.path.exists(sha):
+        os.remove(sha)
     os.replace(tmp, os.path.join(outdir, "mtp-fp8.safetensors"))
-    print(f"{len(NAMES)} MTP linears on block FP8 in {outdir}")
+    with open(sha + ".tmp", "w") as f:
+        f.write(f"{digest.hexdigest()}  mtp-fp8.safetensors\n")
+    os.replace(sha + ".tmp", sha)
+    print(f"{len(NAMES)} MTP linears on block FP8 in {outdir}, sha256 {digest.hexdigest()[:12]}")
     return 0
 
 

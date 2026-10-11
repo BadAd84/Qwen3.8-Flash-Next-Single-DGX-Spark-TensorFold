@@ -166,12 +166,13 @@ if (( PARALLEL * full + 66 + TENSORFOLD_MEMORY_RESERVE_GIB > 121 )); then
   warn "$PARALLEL full windows are ~$((PARALLEL * full)) GiB of $KV_DTYPE cache beside ~66 GiB of weights: the engine keeps $TENSORFOLD_MEMORY_RESERVE_GIB GiB free and refuses a request that would not fit"
 fi
 # MTP_FP8=1: the drafts' MTP layer on block FP8 (patches/0011), from the overlay prepare.sh wrote under the HF cache
+# for this checkpoint revision and this tools/mtp_fp8.py, its bytes checked against the sha256 the tool wrote
 if [[ "$MTP_FP8" == 1 && "$DRAFTS" == 1 && -z "${TF_FLASHNEXT_MTP_FP8:-}" ]]; then
-  if [[ -f "$HF_CACHE/$(mtp_fp8_sub)/mtp-fp8.safetensors" ]]; then
+  if mtp_fp8_ok; then
     TF_FLASHNEXT_MTP_FP8="/root/.cache/huggingface/$(mtp_fp8_sub)"
     export TF_FLASHNEXT_MTP_FP8
   else
-    warn "MTP_FP8=1 but $HF_CACHE/$(mtp_fp8_sub) has no overlay: drafting from the bf16 layer (run scripts/prepare.sh)"
+    warn "MTP_FP8=1 but $HF_CACHE/$(mtp_fp8_sub) has no overlay whose sha256 checks: drafting from the bf16 layer (run scripts/prepare.sh)"
   fi
 fi
 

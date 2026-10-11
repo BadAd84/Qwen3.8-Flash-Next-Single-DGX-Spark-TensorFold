@@ -146,8 +146,17 @@ snapshot_rev() {
   if [[ -n "$MODEL_REVISION" ]]; then echo "$MODEL_REVISION"
   else cat "$(model_cache_dir)/refs/main" 2>/dev/null; fi
 }
-# The MTP FP8 overlay of the pinned checkpoint, relative to the HF cache (start.sh mounts the cache read-only)
-mtp_fp8_sub() { echo "tensorfold-mtp-fp8/${MODEL_ID//\//--}/$(snapshot_rev)"; }
+# The MTP FP8 overlay of the pinned checkpoint, relative to the HF cache (start.sh mounts the cache read-only): one
+# directory a checkpoint revision and a version of tools/mtp_fp8.py (the first 12 hex of its sha256), so a changed
+# tool writes a new overlay instead of reusing an older one. mtp_fp8_ok: the overlay is there and its bytes match the
+# mtp-fp8.sha256 the tool wrote beside it.
+mtp_fp8_tool() { sha256sum "$(dirname "${BASH_SOURCE[0]}")/../tools/mtp_fp8.py" | cut -c1-12; }
+mtp_fp8_sub() { echo "tensorfold-mtp-fp8/${MODEL_ID//\//--}/$(snapshot_rev)/tool-$(mtp_fp8_tool)"; }
+mtp_fp8_ok() {
+  local d
+  d="$HF_CACHE/$(mtp_fp8_sub)"
+  [[ -f "$d/mtp-fp8.safetensors" && -f "$d/mtp-fp8.sha256" ]] && (cd "$d" && sha256sum -c --status mtp-fp8.sha256)
+}
 
 PREPARED_MARKER="$STATE_DIR/prepared"
 prepared_state() {
@@ -157,7 +166,7 @@ prepared_state() {
   rev=$(snapshot_rev)
   local fp8=off
   if [[ "$MTP_FP8" == 1 ]]; then
-    if [[ -f "$HF_CACHE/$(mtp_fp8_sub)/mtp-fp8.safetensors" ]]; then fp8=present; else fp8=missing; fi
+    if mtp_fp8_ok; then fp8=present; else fp8=missing; fi
   fi
   echo "model=$MODEL_ID@$rev image=$label patches=$hash mtp_fp8=$fp8"
 }

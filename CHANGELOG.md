@@ -8,9 +8,10 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
 - `patches/0011-flash-next-mtp-fp8-overlay` and `MTP_FP8=1` (the default): the MTP layer's bf16 linears (attention
   q/k/v/o, the hyper-connections and the mixer) on block FP8 for drafting. `scripts/prepare.sh` writes the overlay
   once with `tools/mtp_fp8.py` (128x128 blocks, the checkpoint's own block-FP8 format) into
-  `$HF_CACHE/tensorfold-mtp-fp8/`; `start.sh` passes it as `TF_FLASHNEXT_MTP_FP8`. The head only drafts and every
-  draft is verified, so every reply stays byte-identical. Decode +4 to +5% on code and about +2% on prose at 1-4 clients.. `MTP_FP8=0` drafts from the bf16
-  layer as before.
+  `$HF_CACHE/tensorfold-mtp-fp8/<model>/<revision>/tool-<sha>/` (one directory a checkpoint revision and a version of
+  the tool, the sha256 of its bytes checked by `prepare.sh` and `start.sh`); `start.sh` passes it as
+  `TF_FLASHNEXT_MTP_FP8`. The head only drafts and every draft is verified, so every reply stays byte-identical.
+  Decode +4 to +5% on code and about +2% on prose at 1-4 clients. `MTP_FP8=0` drafts from the bf16 layer as before.
 
 ## [1.0.0] - 2026-10-08
 
