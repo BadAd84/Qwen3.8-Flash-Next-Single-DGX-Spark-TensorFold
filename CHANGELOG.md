@@ -9,7 +9,8 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   `TF_FLASHNEXT_DRAFT_CONTINUE=0.20`, `TF_FLASHNEXT_DRAFT_DEPTH_SHARED=7` (the defaults): the running-product draft
   stop is split into a propose line and a continue line, the draft head reads the int4 lm_head's own columns (105 MB a
   step instead of 127.5 MB), and drafts are capped at 7 a stream while 2+ streams draft together. Decode +1.4 to +7%
-  at 1-2 clients; every reply byte-identical.
+  at 1-2 clients; every reply byte-identical. A checkpoint without the int4 lm_head's draft columns drafts from the 4-bit draft rows, with a warning;
+  `_PROPOSE` and `_CONTINUE` are set together, as numbers with 0 < propose <= continue <= 1, or the start stops.
 
 ## [1.0.0] - 2026-10-08
 
