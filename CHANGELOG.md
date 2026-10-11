@@ -9,7 +9,8 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   `TF_FLASHNEXT_HEAD_ROW_TILES=2` (the defaults): block-FP8 split-K projections of 2048+ columns below 256 rows run
   on the fused kernel (one block a column tile, its K slices in slice order, the cluster's sum), and the int4 lm_head
   takes 32-row items. `out_proj` -9% a round; on the merged build code at 4 clients +8%, copy windows +7%; every reply
-  byte-identical (`tensorfold fp8-fused-check`, `tensorfold int4-head-check`).
+  byte-identical (`tensorfold fp8-fused-check`, `tensorfold int4-head-check`). `TF_FLASHNEXT_HEAD_ROW_TILES` other than 1 or 2, or `TF_FLASHNEXT_FP8_FUSED_SPLIT` other than 0, 4 or 8, stops
+  the start.
 
 ## [1.0.0] - 2026-10-08
 
