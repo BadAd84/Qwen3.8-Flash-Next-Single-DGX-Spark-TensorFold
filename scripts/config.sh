@@ -119,11 +119,12 @@ kv_gib() {
   echo $(( (bytes * ctx + 1073741823) / 1073741824 ))
 }
 # mem_need_gib <context>: MemAvailable a start needs: weights, one full window, scratch slack, the vision workspace
-# when VISION=1, floor, 2 GiB.
+# when VISION=1, the read-outs' 12-bit copies when TF_FLASHNEXT_HC_Q12 is on (0.97 GB, patches/0022), floor, 2 GiB.
 mem_need_gib() {
-  local ctx=${1:-$CONTEXT} vision=0
+  local ctx=${1:-$CONTEXT} vision=0 q12=0
   [[ "$VISION" == 1 ]] && vision=2
-  echo $(( 66 + $(kv_gib "$ctx") + 8 + vision + MEM_FLOOR_GIB + 2 ))
+  [[ "${TF_FLASHNEXT_HC_Q12:-0}" != 0 ]] && q12=1
+  echo $(( 66 + $(kv_gib "$ctx") + 8 + vision + q12 + MEM_FLOOR_GIB + 2 ))
 }
 
 HF_CACHE="${HF_CACHE:-${HF_HOME:-$HOME/.cache/huggingface}}"
