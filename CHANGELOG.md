@@ -9,7 +9,7 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   defaults): the sparse-attention indexer's block lists come from one read of each row's scores (`fn_qsa_stream.cu`,
   one CTA a row or a cluster of 4), and the prompt indexer's scores use `fma.rn.f32.bf16` on the packed bf16 words.
   Cold prefill +4.2% at 128k and +5.5% at 200k through the server; decode -6.5% time a token at 200k; every reply
-  byte-identical (`qsa-check`).
+  byte-identical (`qsa-check`). `TF_FLASHNEXT_QSA_SELECT=0` makes the calls from before the option.
 
 ## [1.0.0] - 2026-10-08
 
