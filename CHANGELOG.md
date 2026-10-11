@@ -9,7 +9,9 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   `TF_FLASHNEXT_MULTI_LRU=1`, `TF_FLASHNEXT_SOLO_MAX=1024`, `TF_FLASHNEXT_MULTI_VERIFY=1` (the defaults): finished
   sequences are reset and kept with their CUDA graphs, captured at load, graph tables evict the least recently used,
   and shared verify rounds run eagerly. Short one-client replies 9% faster, the first request after boot 14%; every
-  reply byte-identical.
+  reply byte-identical. `TF_FLASHNEXT_SEQ_POOL`, `TF_FLASHNEXT_WARM_POOL`, `TF_FLASHNEXT_MULTI_MAX`, `TF_FLASHNEXT_MULTI_VERIFY` or
+  `TF_FLASHNEXT_SOLO_MAX` that is not a count, or a sequence pool at two GPUs, stops the start; a reused sequence
+  equals a fresh one (`tensorfold pool-check`).
 
 ## [1.0.0] - 2026-10-08
 
