@@ -9,7 +9,8 @@ Newest first. This recipe serves one DGX Spark. The image is `tensorfold-qwen38:
   `TF_FLASHNEXT_INT4_PROMPT_GATE_UP=1` (the defaults): prompt chunks run the wide block-FP8 projections on 128 x 128
   tiles and the fused split-K form in 2 stages, and the routed experts' gate/up on `int4_prompt_kernel` with 64-pair
   items. Cold prefill +5.5% at 8k and 32k, +5.3% at 128k; every reply byte-identical (`fp8-tiles-check`,
-  `int4-check`).
+  `int4-check`). The prompt gate/up runs only where its 99,840-byte block fits the GPU's shared memory and the gate/up width is
+  whole 128-column blocks; otherwise `int4_kernel`.
 
 ## [1.0.0] - 2026-10-08
 
